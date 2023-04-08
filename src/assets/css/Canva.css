@@ -1,0 +1,9 @@
+.canva-container {
+  width: fit-content;
+  outline: 2px solid black;
+}
+
+.canva-container canvas {
+  image-rendering: pixelated;
+  cursor: pointer;
+}

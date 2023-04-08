@@ -1,6 +1,8 @@
 import React from "react";
 import "./assets/css/App.css"
 
+import Canva from "./components/Canva"
+
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { firebaseConfig } from "./assets/settings";
@@ -14,7 +16,7 @@ const App = () => {
 
   return (
     <div className="main-container">
-
+      <Canva />
     </div>
   );
 };

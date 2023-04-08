@@ -4,7 +4,17 @@
   box-sizing: border-box;
 }
 
+body {
+  overflow: hidden;
+}
+
 #app {
   height: 100%;
   width: 100%;
+}
+
+.main-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
