@@ -1,9 +1,26 @@
+.canva-location-container {
+  position: fixed;
+  top: 20px;
+  left: calc(50% - 70px);
+  width: 140px;
+  height: 30px;
+  border-radius: 10px;
+  background-color: rgb(189, 189, 189);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.canva-location-container div {
+  margin-inline: 5px;
+}
+
 .canva-container {
   width: fit-content;
-  outline: 2px solid black;
 }
 
 .canva-container canvas {
   image-rendering: pixelated;
   cursor: pointer;
+  outline: 2px solid black;
 }
