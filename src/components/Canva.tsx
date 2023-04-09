@@ -3,9 +3,16 @@ import "../assets/css/Canva.css"
 
 import FooterActionsBar from "./Footer";
 
+import { initializeApp } from "firebase/app";
+import { doc, getFirestore, setDoc } from "firebase/firestore";
+import { firebaseConfig } from "../assets/settings";
+
 const pixel_size = 10;
 
-const Canva = () => {
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app)
+
+const Canva = ({canvaData}: {canvaData: { color: string, lastEdit: string, userID: number }[][]}) => {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -31,6 +38,14 @@ const Canva = () => {
   const [mouseDown, setMouseDown] = useState(false)
 
   useEffect(() => {
+    for (let row = 0; row < 100; row++) {
+      for (let column = 0; column < 100; column++) {
+        drawPixel({x: column * 10, y: row * 10, customColor: canvaData[row][column].color, toDB: false})
+      }
+    }
+  }, [])
+
+  useEffect(() => {
     updatePixelPlaceholder()
   }, [canvasScale, canvasMargins])
 
@@ -54,13 +69,27 @@ const Canva = () => {
     )
   }
 
-  function drawPixel({x, y}: {x: number, y: number}) {
+  function drawPixel({x, y, customColor, toDB = true}: {x: number, y: number, customColor?: string, toDB?: boolean}) {
     const ctx = canvasRef.current.getContext("2d")
 
+    const fillColor = (customColor || color)
+
     ctx.beginPath();
-    ctx.fillStyle = color;
+    ctx.fillStyle = fillColor;
     ctx.fillRect(x, y, pixel_size, pixel_size);
     ctx.fill();
+    
+    if (!toDB) return
+
+    let newCanvaData = canvaData
+    newCanvaData[y / 10][x / 10] = {
+      color: fillColor,
+      lastEdit: (new Date().getTime().toString().slice(0, 10)),
+      userID: 1
+    }
+    setDoc(doc(db, "/place-grid/GRID_DATA"), {
+      pixelsDataToString: JSON.stringify(newCanvaData)
+    })
   }
 
   function getPixelCoordsOnCanvas({x, y, pixel_size = 10}: {x: number, y: number, pixel_size?: number}) {
