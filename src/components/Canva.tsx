@@ -14,10 +14,15 @@ const Canva = () => {
   })
 
   const [canvasScale, setCanvasScale] = useState(1)
+  const [canvasMargins, setCanvasMargins] = useState({
+    top: 0,
+    left: 0
+  })
   const [mouseScroll, setMouseScroll] = useState({
     x: 0,
     y: 0
   })
+  const [mouseDown, setMouseDown] = useState(false)
 
   function updatePixelPlaceholder() {
     const canvasElPosition = canvasRef.current.getBoundingClientRect()
@@ -69,13 +74,32 @@ const Canva = () => {
     }
     
     if (e.deltaY > 0) {
+      if (canvasScale <= 0.7) return
       setMouseScroll(scroll_origin)
-      setCanvasScale((cCanvasScale) => (cCanvasScale -= 0.1))
+      setCanvasScale((cCanvasScale) => {
+        const newCanvasScale = Math.round((cCanvasScale -= 0.1) * 10) / 10
+        return newCanvasScale
+      })
     } else {
+      if (canvasScale >= 2) return
       setMouseScroll(scroll_origin)
-      setCanvasScale((cCanvasScale) => (cCanvasScale += 0.1))
+      setCanvasScale((cCanvasScale) => {
+        const newCanvasScale = Math.round((cCanvasScale += 0.1) * 10) / 10
+        return newCanvasScale
+      })
     }
-    updatePixelPlaceholder()
+  }
+
+  function handleMove(e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
+    if (!mouseDown) return
+
+    setCanvasMargins((cCanvasMargins) => {
+      return {
+        top: cCanvasMargins.top + e.movementY,
+        left: cCanvasMargins.left + e.movementX
+      }
+    })
+
   }
 
 
@@ -90,11 +114,12 @@ const Canva = () => {
           ref={canvasRef}
           height="1000"
           width="1000"
-          onClick={(e) => {
-            setPixelOnCanva(e)
-          }}
+          onMouseDown={() => { setMouseDown(true) }} 
+          onMouseUp={() => { setMouseDown(false) }}
+          onMouseLeave={() => { setMouseDown(false) }}
+          onMouseMove={handleMove}
           onWheel={handleScroll}
-          style={{transform: `scale(${canvasScale})`, transformOrigin: `${mouseScroll.x}px ${mouseScroll.y}px`}}
+          style={{transform: `scale(${canvasScale})`, transformOrigin: `${mouseScroll.x}px ${mouseScroll.y}px`, marginTop: canvasMargins.top, marginLeft: canvasMargins.left}}
         ></canvas>
       </div>
     </>

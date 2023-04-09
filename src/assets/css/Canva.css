@@ -23,4 +23,9 @@
   image-rendering: pixelated;
   cursor: pointer;
   outline: 2px solid black;
+  cursor: grab;
+}
+
+.canva-container canvas:active {
+  cursor: grabbing;
 }
