@@ -4,7 +4,7 @@ import "../assets/css/Canva.css"
 import FooterActionsBar from "./Footer";
 
 import { initializeApp } from "firebase/app";
-import { doc, getFirestore, setDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getFirestore, updateDoc } from "firebase/firestore";
 import { firebaseConfig } from "../assets/settings";
 
 const pixel_size = 10;
@@ -12,7 +12,7 @@ const pixel_size = 10;
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app)
 
-const Canva = ({canvaData}: {canvaData: { color: string, lastEdit: string, userID: number }[][]}) => {
+const Canva = ({canvaData, newPixels, setNewPixels}: {canvaData: { color: string, lastEdit: string, userID: number }[][], newPixels: any[], setNewPixels: Function}) => {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -49,19 +49,29 @@ const Canva = ({canvaData}: {canvaData: { color: string, lastEdit: string, userI
     updatePixelPlaceholder()
   }, [canvasScale, canvasMargins])
 
+  useEffect(() => {
+    if (newPixels.length == 0) return
+    const newPixel = newPixels.pop()
+
+    drawPixel({x: newPixel.coords.x * 10, y: newPixel.coords.y * 10, customColor: newPixel.color, toDB: false})
+    setNewPixels([
+      ...newPixels
+    ])
+  }, [newPixels])
+
   function updatePixelPlaceholder() {
     const canvasElPosition = canvasRef.current.getBoundingClientRect()
 
     const pixel_size = canvasElPosition.height / 100
 
-    const {pixel_x, pixel_y} = getPixelCoordsOnCanvas({x: (window.innerWidth / 2) - ((window.innerWidth / 2) % pixel_size), y:(window.innerHeight / 2) - ((window.innerHeight / 2) % pixel_size)})
+    const {pixel_x, pixel_y} = getPixelCoordsOnCanvas({x: (window.innerWidth / 2), y: (window.innerHeight / 2), pixel_size})
 
     setPixelPlaceHolderData(
       {
-        x: getPixelCoordsOnCanvas({x: (window.innerWidth / 2), y: (window.innerHeight / 2), pixel_size}).pixel_x + (canvasElPosition.x % pixel_size),
-        y: getPixelCoordsOnCanvas({x: (window.innerWidth / 2), y: (window.innerHeight / 2), pixel_size}).pixel_y + (canvasElPosition.y % pixel_size),
-        canvas_x: pixel_x,
-        canvas_y: pixel_y,
+        x: pixel_x + (canvasElPosition.x),
+        y: pixel_y + (canvasElPosition.y),
+        canvas_x: getPixelCoordsOnCanvas({x: pixel_x + (canvasElPosition.x), y: pixel_y + (canvasElPosition.y)}).pixel_x,
+        canvas_y: getPixelCoordsOnCanvas({x: pixel_x + (canvasElPosition.x), y: pixel_y + (canvasElPosition.y)}).pixel_y,
         height: pixel_size,
         width: pixel_size,
         display: canvasScale > 1.4 ? true : false
@@ -75,20 +85,31 @@ const Canva = ({canvaData}: {canvaData: { color: string, lastEdit: string, userI
     const fillColor = (customColor || color)
 
     ctx.beginPath();
-    ctx.fillStyle = fillColor;
+    ctx.fillStyle = toDB ? `${fillColor}99` : fillColor;
     ctx.fillRect(x, y, pixel_size, pixel_size);
     ctx.fill();
     
     if (!toDB) return
 
+    const editTimestamp = new Date().getTime().toString().slice(0, 10)
+
     let newCanvaData = canvaData
-    newCanvaData[y / 10][x / 10] = {
+    newCanvaData[y / pixel_size][x / pixel_size] = {
       color: fillColor,
-      lastEdit: (new Date().getTime().toString().slice(0, 10)),
+      lastEdit: editTimestamp,
       userID: 1
     }
-    setDoc(doc(db, "/place-grid/GRID_DATA"), {
+
+    updateDoc(doc(db, "/place-grid/GRID_DATA"), {
       pixelsDataToString: JSON.stringify(newCanvaData)
+    })
+    addDoc(collection(db, "grid-history"), {
+      color: fillColor,
+      coords: {
+        x: x / pixel_size,
+        y: y / pixel_size
+      },
+      editedAt: editTimestamp,
     })
   }
 

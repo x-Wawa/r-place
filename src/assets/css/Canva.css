@@ -1,5 +1,6 @@
 .canva > .location-container {
   position: fixed;
+  z-index: 10;
   top: 20px;
   left: calc(50% - 70px);
   width: 140px;
