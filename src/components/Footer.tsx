@@ -8,9 +8,16 @@ const FooterActionsBar = ({color, setColor, setPixel, selectedPixelData}: {color
   return (
     <div className="footer-container">
       <div className="pixel-placer-container">
-            <div className="place-pixel button" onClick={() => {
-              setPixel({x: selectedPixelData.x, y: selectedPixelData.y})
-            }}>Place !</div>
+        <div
+          className="place-pixel button"
+          onClick={(e) => {
+            e.currentTarget.classList.add("place-pixel-active")
+            setPixel({x: selectedPixelData.x, y: selectedPixelData.y})
+          }}
+          onAnimationEnd={(e) => {
+            e.currentTarget.classList.remove("place-pixel-active")
+          }}
+        >Place !</div>
         <input
           type="color"
           className="colors-picker button"

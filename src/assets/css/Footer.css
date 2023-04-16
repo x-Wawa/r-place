@@ -21,7 +21,7 @@
 .pixel-placer-container > .button {
   height: 45px;
   min-width: 45px;
-  border-radius: 10px;
+  border-radius: 5px;
   cursor: pointer;
 }
 
@@ -30,8 +30,30 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 20px;
-  background-color: rgb(255, 129, 181);
+  font-size: 25px;
+  background: rgb(226,64,129);
+  background: linear-gradient(0deg, rgba(226,64,129,1) 0%, rgba(252,70,107,1) 50%);
+  filter: drop-shadow(rgb(226,64,129, 0.8) 0px 10px 15px);
+  transition: 0.3s;
+}
+
+.pixel-placer-container > .place-pixel:hover {
+  background: rgb(231,45,119);
+  background: linear-gradient(0deg, rgba(231,45,119,1) 0%, rgba(255,50,91,1) 50%); 
+  filter: drop-shadow(rgb(226,64,129, 1) 0px 0px 20px);
+}
+
+.pixel-placer-container > .place-pixel-active {
+  animation: placePixelClick 0.2s;
+}
+
+@keyframes placePixelClick {
+  0% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .pixel-placer-container > .colors-picker {
